@@ -11,18 +11,18 @@ public class Axing {
     Map<Integer, Integer> path1=new HashMap<>();
     @Test
     public void test(){
-        int[][] matrix={{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,-1,-1,-1,-1,-1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,-1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,-1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,-1,1,1,1,1,1},
-                {1,1,1,1,1,-1,-1,-1,-1,-1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
-        int start=32;
-        int end=105;
+        int[][] matrix={{1,1,1,1,1,1,1,1,1,1,-1,1,1,1,3},   //0-14
+                        {1,1,1,1,1,1,1,1,1,1,-1,1,5,4,1},   //15-29
+                        {1,1,1,1,1,1,1,1,1,1,-1,1,1,1,5},   //30-44
+                        {1,1,1,1,-1,1,1,1,1,1,-1,1,1,1,1},  //45-59
+                        {1,1,1,1,-1,1,1,1,1,1,-1,1,1,1,1},  //60-74
+                        {1,1,1,1,-1,1,1,1,1,1,-1,1,1,1,1},  //75-89
+                        {1,1,1,1,-1,1,1,1,1,1,-1,1,1,1,1},  //90-104
+                        {1,1,2,3,-1,1,1,1,1,1,-1,1,1,1,1},  //105-119
+                        {1,1,1,1,-1,1,1,1,1,1,1,1,1,1,1},   //120-134
+                        {1,1,1,1,-1,1,1,1,1,1,1,1,1,1,1}};  //135-149
+        int start=106;
+        int end=29;
         List<Integer> path=Axing(matrix,start,end);  //改进一下 目前只能找到探测过的格子 要找到最短路径和消耗
         if(path==null){
             System.out.println("没有路径");
@@ -36,28 +36,35 @@ public class Axing {
                 System.out.println(path1.get(path.get(i))+"移动到了"+path.get(i));
             }
             System.out.println("---------------------------");
-            for(int i=path.size()-1;;i--){
-                if(path1.get(path.get(i))==start){
-                    int sum=0;
-                    for(int j=i;j<path.size();j++){
-                        int price=matrix[path.get(j)/matrix[0].length][path.get(j)%matrix[0].length];
+            int num=end;
+            int sum=0;
+            while (true){
+                for(int i=0;i<path.size();i++){
+                    if(path.get(i)==num){
+                        int price=matrix[path.get(i)/matrix[0].length][path.get(i)%matrix[0].length];
                         sum+=price;
-                        System.out.println(path1.get(path.get(j))+"移动到了"+path.get(j)+",花费了代价"+price);
+                        System.out.println(num+"移动到"+path1.get(path.get(i))+",花费了代价"+price);
+                        num=path1.get(path.get(i));
+                        break;
                     }
-                    System.out.println("总代价为"+sum);
+                }
+                if(num==start){
                     break;
                 }
             }
+            System.out.println("总代价为"+sum);
         }
 
     }
 
-    public int heuristic(int end,int next,int length){  //计算曼哈顿距离
+    public int heuristic(int end,int next,int length){  //计算距离
         int starty=next/length;
         int startx=next-starty*length;
         int endy=end/length;
         int endx=end-endy*length;
-        return Math.abs(endy-starty)+Math.abs(endx-startx);
+        //return Math.abs(endy-starty)+Math.abs(endx-startx);
+        //修改后传送回去的距离为权重乘实际距离 权重越大运算速度越快，但不能保证时最短 所以采用1+（当前点到终点距离/起点到终点距离）作为权重
+        return (int) (Math.pow((endy-starty)*(endy-starty)+(endx-startx)*(endx-startx),0.5)*Math.abs(endy-starty)+Math.abs(endx-startx));
     }
     public int getcurrent(Map<Integer, Integer> frontier,List<Integer> list){  //找到当前代价最低的格子的index
         int value=Integer.MIN_VALUE;
